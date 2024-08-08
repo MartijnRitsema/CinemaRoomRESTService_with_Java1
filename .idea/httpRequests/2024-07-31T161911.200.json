@@ -1,0 +1,17 @@
+{
+  "args": {
+    "generated-in": "IntelliJ IDEA"
+  },
+  "headers": {
+    "Accept": "*/*",
+    "Accept-Encoding": "br, deflate, gzip, x-gzip",
+    "Content-Length": "0",
+    "Host": "examples.http-client.intellij.net",
+    "User-Agent": "IntelliJ HTTP Client/IntelliJ IDEA 2024.1.4",
+    "X-Forwarded-Host": "examples.http-client.intellij.net",
+    "X-Forwarded-Scheme": "https",
+    "X-Scheme": "https"
+  },
+  "origin": "129.41.46.51",
+  "url": "https://examples.http-client.intellij.net/get?generated-in=IntelliJ+IDEA"
+}

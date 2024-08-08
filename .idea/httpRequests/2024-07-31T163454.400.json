@@ -1,0 +1,6 @@
+{
+  "timestamp": "2024-07-31T14:34:54.894+00:00",
+  "status": 400,
+  "error": "Bad Request",
+  "path": "/purchase"
+}
