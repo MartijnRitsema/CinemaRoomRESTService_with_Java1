@@ -4,66 +4,79 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 public class CinemaController {
-    final Cinema cinema;
-    private final Map<String, Seat> tokenSeatMap = new HashMap<>();
 
-    // Constructor to inject Cinema bean
-    public CinemaController(Cinema cinema) {
-        this.cinema = cinema;
-    }
+    private final List<Seat> seats = new ArrayList<>();
 
-    // Endpoint to get the list of seats in the cinema
-    @GetMapping("/seats")
-    public CinemaResponse getCinemaResponse() {
-        return new CinemaResponse(cinema);
-    }
-
-    // Endpoint to purchase a ticket for a specific seat
-    @PostMapping("/purchase")
-    public ResponseEntity<Map<String, Object>> checkAndPurchaseTicket(@RequestBody SeatRequest seatRequest) {
-        // Check each seat in the cinema
-        for (Seat seat : cinema.getSeats()) {
-            // If seat matches the request
-            if (seat.getRow() == seatRequest.getRow() && seat.getColumn() == seatRequest.getColumn()) {
-                // If the seat is not booked, book it and return the seat details
-                if (!seat.isBooked()) {
-                    seat.setBooked(true);
-                    String token = UUID.randomUUID().toString();
-                    tokenSeatMap.put(token, seat);
-                    Map<String, Object> response = new HashMap<>();
-                    response.put("token", token);
-                    response.put("ticket", new SeatResponse(seat.getRow(), seat.getColumn(), seat.getPrice()));
-                    return new ResponseEntity<>(response, HttpStatus.OK);
-                }
-                // Throw an exception if the seat is already booked
-                throw new SeatAlreadyPurchasedException("The ticket has been already purchased!");
+    public CinemaController() {
+        int rows = 9;
+        int columns = 9;
+        for (int row = 1; row <= rows; row++) {
+            for (int column = 1; column <= columns; column++) {
+                seats.add(new Seat(row, column));
             }
         }
-        // Throw an exception if the seat is not found
-        throw new SeatNotFoundException("The number of a row or a column is out of bounds!");
     }
 
-    // Endpoint to return a purchased ticket
-    @PostMapping("/return")
-    public ResponseEntity<?> returnTicket(@RequestBody Map<String, String> tokenRequest) {
-        String token = tokenRequest.get("token");
-        Seat seat = tokenSeatMap.remove(token);
+    @GetMapping("/seats")
+    public CinemaResponse getSeats() {
+        int rows = 9;
+        int columns = 9;
+        return new CinemaResponse(rows, columns, seats);
+    }
 
-        // If the token is invalid or the seat is not found, return an error response
-        if (seat == null) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Wrong token!");
-            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    @PostMapping("/purchase")
+    public ResponseEntity<?> purchaseTicket(@RequestBody SeatRequest seatRequest) {
+        int row = seatRequest.getRow();
+        int column = seatRequest.getColumn();
+
+        // Check if the seat is valid
+        if (row < 1 || row > 9 || column < 1 || column > 9) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("The number of a row or a column is out of bounds!"));
         }
 
-        // Mark the seat as available again and return the seat details
-        seat.setBooked(false);
-        Map<String, Object> response = new HashMap<>();
-        response.put("ticket", new SeatResponse(seat.getRow(), seat.getColumn(), seat.getPrice()));
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        // Find the seat and check if it is already purchased
+        for (Seat seat : seats) {
+            if (seat.getRow() == row && seat.getColumn() == column) {
+                if (seat.isPurchased()) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("The ticket has been already purchased!"));
+                } else {
+                    seat.setPurchased(true);
+                    seat.setToken(UUID.randomUUID().toString());
+                    return ResponseEntity.ok(new TicketResponse(seat.getToken(), seat));
+                }
+            }
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("The number of a row or a column is out of bounds!"));
+    }
+
+    @PostMapping("/return")
+    public ResponseEntity<?> returnTicket(@RequestBody TokenRequest token) {
+        String tokenString = token.getToken();
+        for (Seat seat : seats) {
+            if (seat.getToken() != null && seat.getToken().equals(tokenString)) {
+                seat.setPurchased(false);
+                seat.setToken(null);
+                return ResponseEntity.ok(new ReturnResponse(seat));
+            }
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("Wrong token!"));
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<?> getStats(@RequestParam Optional<String> password) {
+        if (password.isPresent()) {
+            if (!password.get().equals("super_secret")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("The password is wrong!"));
+            }
+            return ResponseEntity.ok(new StatsResponse(seats));
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("The password is wrong!"));
     }
 }

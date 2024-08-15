@@ -1,50 +1,63 @@
 package cinema;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+
 public class Seat {
     private int row;
     private int column;
     private int price;
-    private boolean isBooked = false;
 
-    // Constructor to initialize a seat with row, column, and price
+    @JsonIgnore
+    private boolean purchased = false;
+
+    @JsonIgnore
+    private String token;
+
     public Seat(int row, int column) {
         this.row = row;
         this.column = column;
-        // Set price based on row number
-        if (row <= 4) price = 10;
-        else price = 8;
+        this.price = row <= 4 ? 10 : 8;
     }
 
-    // Getters and setters for row, column, price, and booking status
     public int getRow() {
         return row;
-    }
-
-    public void setRow(int row) {
-        this.row = row;
     }
 
     public int getColumn() {
         return column;
     }
 
-    public void setColumn(int column) {
-        this.column = column;
-    }
-
-    public boolean isBooked() {
-        return isBooked;
-    }
-
-    public void setBooked(boolean isBooked) {
-        this.isBooked = isBooked;
-    }
-
     public int getPrice() {
         return price;
     }
 
+    public boolean isPurchased() {
+        return purchased;
+    }
+
+    public void setRow(int row) {
+        this.row = row;
+    }
+
+    public void setColumn(int column) {
+        this.column = column;
+    }
+
     public void setPrice(int price) {
         this.price = price;
+    }
+
+    public void setPurchased(boolean purchased) {
+        this.purchased = purchased;
+    }
+
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

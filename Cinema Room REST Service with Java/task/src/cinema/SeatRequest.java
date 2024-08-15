@@ -4,7 +4,6 @@ public class SeatRequest {
     private int row;
     private int column;
 
-    // Getters and setters for row and column
     public int getRow() {
         return row;
     }
