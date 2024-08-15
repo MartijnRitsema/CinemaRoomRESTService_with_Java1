@@ -1,0 +1,111 @@
+<div class="step-text">
+<p>Working concurrently with shared data from multiple threads may cause unexpected or erroneous behavior. Fortunately, Java provides a mechanism to control the access of multiple threads to a shared resource of any type. The mechanism is known as <strong><a class="theory-lookup not-relevant" href="/learn/step/3557" rel="noopener noreferrer nofollow" target="_blank" title="In Java, thread synchronization is a mechanism that controls the access of multiple threads to a shared resource of any type, preventing unexpected or erroneous behavior. | A critical section is a region of code that accesses a shared resource and should not be executed by more than one thread at the same time. The monitor is a special mechanism that controls concurrent access to an object, and each object in Java has an associated implicit monitor. A thread can acquire a monitor, and other threads cannot acquire this monitor at the same time, ensuring that only one thread can execute code in a synchronized instance method of a particular instance. This concept can be summarized as one thread per instance.">thread synchronization</a></strong>. </p>
+<h5 id="important-terms-and-concepts">Important terms and concepts</h5>
+<p>Before we start using synchronization in our code, let's introduce terms and concepts we're going to use.</p>
+<p>1) A <strong><a class="theory-lookup not-relevant" href="/learn/step/3557" rel="noopener noreferrer nofollow" target="_blank" title="In Java, a critical section is a region of code that accesses shared resources and should not be executed by more than one thread at the same time. | Shared resources can be variables, files, input/output ports, databases, or other types of resources. For example, if a class has a static field named two thread increment, and two threads increment it, sometimes a thread may see an intermediate value of the non-atomic operation. This is a visibility and atomicity problem that can occur while working with shared data. To prevent this, Java provides a mechanism called thread synchronization. Each object in Java has an associated implicit monitor that controls concurrent access to the object. A thread can acquire a monitor, and while it holds the monitor, other threads cannot acquire it. They will wait until the owner (the thread that acquired the monitor) releases it. This mechanism allows programmers to protect critical sections from being accessed by multiple threads concurrently.">critical section</a></strong> is a region of code that accesses shared resources and should not be executed by more than one thread at the same time. A shared resource may be a variable, file, input/output port, database or something else.</p>
+<p>Let's consider an example. A class has a <a class="theory-lookup not-relevant" href="/learn/step/3557" rel="noopener noreferrer nofollow" target="_blank" title="In Java, a static field is a field declared with the `static` keyword that is shared by all objects of a class, rather than belonging to an individual instance. | It can hold any primitive or reference type, and all instances of the class share the same value for a static field. Static fields are useful for storing global variables that all instances of a class should share, as they help save memory by not creating separate copies for each instance. However, it's typically not recommended to declare non-final public static fields, as they can be accessed and modified by any code that has access to the class. Additionally, it's important to note that static fields cannot access instance fields or methods, as there is no instance context.">static field</a> named <code class="language-java">counter</code>:</p>
+<pre><code class="language-java">public static long counter = 0;</code></pre>
+<p>Two threads increment the field (increase by 1) 10 000 000 times concurrently. The final value should be 20 000 000. But, as we've discussed in previous topics, the result often might turn out wrong, for example, 10 999 843.</p>
+<p>This happens because sometimes a thread does not see changes of shared data performed by another thread, and sometimes a thread may see an intermediate value of the <a class="theory-lookup not-relevant" href="/learn/step/3557" rel="noopener noreferrer nofollow" target="_blank" title="In Java, a non-atomic operation is an operation that consists of multiple steps. | This means that a non-atomic operation is not indivisible and can be broken down into smaller parts. Because of this, a thread may operate on an intermediate value of a non-atomic operation performed by another thread, leading to a problem called thread interference. This occurs when the sequence of steps of a non-atomic operation performed by several threads may overlap. For example, increment is a non-atomic operation, and even the reading and writing of a 64-bit value may not be atomic on some platforms. To make these operations atomic, fields should be declared using the volatile keyword in Java.">non-atomic operation</a>. Those are visibility and atomicity problems we deal with while working with shared data.</p>
+<p>This is why increasing value by multiple threads is a <strong>critical section</strong>. Of course, this example is very simple, a critical section may be way more complicated.</p>
+<p>2)<strong> </strong>The<strong> monitor </strong>is a special mechanism to control <a class="theory-lookup not-relevant" href="/learn/step/3557" rel="noopener noreferrer nofollow" target="_blank" title="In Java, concurrent access refers to the ability for multiple threads to access and potentially modify shared data or resources concurrently. | This can lead to issues such as data inconsistency and thread interference if not properly managed. To handle concurrent access, there are two main approaches: optimistic and pessimistic locking. Optimistic locking allows multiple threads to access the shared resource without blocking, but it can result in conflicts and retries, potentially slowing down the system. Pessimistic locking, on the other hand, uses a lock or monitor to ensure that only one thread can access the critical section of code that modifies the shared resource at a time. Concurrent collections, such as a concurrent queue, are often used to organize communication between threads and ensure thread-safety. Classic collections like ArrayList, HashSet, and LinkedList are non-synchronized and do not provide thread-safety, while older collections like Vector, Hashtable, and Vector are synchronized but have lower performance.">concurrent access</a> to an object. In Java, each object has an associated implicit monitor. A thread can acquire a monitor, then other threads cannot acquire this monitor at the same time. They will wait until the owner (the thread that acquired the monitor) releases it.</p>
+<p>Thus, a thread can be locked by the <strong>monitor</strong> of an object and wait for its release. This mechanism allows programmers to protect <strong>critical sections </strong>from being accessed<strong> </strong>by multiple threads concurrently.</p>
+<h5 id="the-synchronized-keyword">The synchronized keyword</h5>
+<p>The "classic" and simplest way to protect code from being accessed by multiple threads concurrently is using the keyword <strong>synchronized</strong>.</p>
+<p>It is used in two different forms:</p>
+<ul><li><p>synchronized method (a static or an instance method)</p></li><li><p><a class="theory-lookup not-relevant" href="/learn/step/3557" rel="noopener noreferrer nofollow" target="_blank" title="In Java, a synchronized block is a section of code within a method that is synchronized for thread safety. | It uses the `synchronized` keyword, followed by the object that will be used as the lock, and then the code block to be synchronized. Only one thread can execute the code in a synchronized block at a time, ensuring that concurrent access to shared resources is controlled and that no two threads can modify the shared data simultaneously. This is useful when you want to synchronize only a specific part of a method, rather than the entire method.">synchronized blocks</a> or statements (inside a static or an instance method)</p></li></ul>
+<p>A synchronized method or block needs an object for locking threads. The monitor associated with this object controls concurrent access to the specified critical section. Only one thread can execute code in a synchronized block or method at the same time. Other threads are blocked until the thread inside the synchronized block or method exits it.</p>
+<h5 id="static-synchronized-methods">Static synchronized methods</h5>
+<p>When we synchronize static methods using the <strong>synchronized</strong> keyword the monitor is the class itself. Only one thread can execute the body of a synchronized static method at the same time. This can be summarized as <em>"one thread per class"</em>.</p>
+<p>Here is an example of a class with a single synchronized <a class="theory-lookup not-relevant" href="/learn/step/3557" rel="noopener noreferrer nofollow" target="_blank" title="In Java, a static method is a method that is associated with a class rather than an instance of a class. | It can be accessed directly using the class name and does not require the creation of a class instance. A static method can only access static fields and other static methods within the same class, and cannot refer to the `this` keyword because there is no instance context. Static methods are often used as utility methods that provide common functionality for the entire project. They can be called from instance methods, but not the other way around.">static method</a> named <code class="language-java">doSomething</code>. </p>
+<pre><code class="language-java">class SomeClass {
+    public static synchronized void doSomething() {
+        String threadName = Thread.currentThread().getName();
+        System.out.println(String.format("%s entered the method", threadName));
+        System.out.println(String.format("%s leaves the method", threadName));
+    }
+}</code></pre>
+<p>The method <code class="language-java">doSomething</code> is declared as synchronized. It can be invoked only from one thread at the same time. The method is synchronized on the object of <code class="language-java">SomeClass</code> class the static method belongs to. Java creates a single special object for each class. To get it use class name plus <code class="language-java">.class</code> prefix. In our case it is<strong> </strong><code class="language-java">SomeClass.class</code>.</p>
+<p>Let's call the method from two threads concurrently. The result will always be similar to:</p>
+<pre><code class="language-java">Thread-0 entered the method
+Thread-0 leaves the method
+Thread-1 entered the method
+Thread-1 leaves the method</code></pre>
+<p>It's impossible for more than one thread to execute code inside the method at the same time.</p>
+<h5 id="instance-synchronized-methods">Instance synchronized methods</h5>
+<p>Instance methods are synchronized on the instance (object). The monitor is the current <code class="language-java">this</code> object that owns the method. If we have two instances of a class, each instance has its own monitor for synchronization.</p>
+<p>Only one thread can execute code in a synchronized <a class="theory-lookup not-relevant" href="/learn/step/3557" rel="noopener noreferrer nofollow" target="_blank" title="In Java, an instance method is a method that belongs to each object created of a particular class. | It can access fields of the specific object of the class. For example, if we have a class with two instance methods: method1() and method2(), and two objects: object1 and object2, the output of these methods will be different for each object because they have different values for the fields. To use an instance method, you must first create an object.">instance method</a> of a particular instance. But different threads can execute methods of different objects at the same time. This can be summarized as <em>"one thread per instance"</em>.</p>
+<p>Here is an example of a class with a single synchronized instance method named <code class="language-java">doSomething</code>. The class also has a constructor for distinguishing instances.</p>
+<pre><code class="language-java">class SomeClass {
+    private String name;
+
+    public SomeClass(String name) {
+        this.name = name;
+    }
+
+    public synchronized void doSomething() {
+        String threadName = Thread.currentThread().getName();
+        System.out.println(String.format("%s entered the method of %s", threadName, name));
+        System.out.println(String.format("%s leaves the method of %s", threadName, name));
+    }
+}</code></pre>
+<p>Here is a class for creating threads that takes an instance of <code class="language-java">SomeClass</code>:</p>
+<pre><code class="language-java">class MyThread extends Thread {
+    private SomeClass someClass;
+
+    public MyThread(SomeClass someClass) {
+        this.someClass = someClass;
+    }
+
+    @Override
+    public void run() {
+        someClass.doSomething();
+    }
+}</code></pre>
+<p>Let's create two instances of the class and three threads invoking <code class="language-java">doSomething</code>. The first and second threads take the same instance of the class, and the third thread takes another one.</p>
+<pre><code class="language-java">SomeClass instance1 = new SomeClass("instance-1");
+SomeClass instance2 = new SomeClass("instance-2");
+
+MyThread first = new MyThread(instance1);
+MyThread second = new MyThread(instance1);
+MyThread third = new MyThread(instance2);
+
+first.start();
+second.start();
+third.start();</code></pre>
+<p>The result will look like this:</p>
+<pre><code class="language-java">Thread-0 entered the method of instance-1
+Thread-2 entered the method of instance-2
+Thread-0 leaves the method of instance-1
+Thread-1 entered the method of instance-1
+Thread-2 leaves the method of instance-2
+Thread-1 leaves the method of instance-1</code></pre>
+<p>As you can see, there are no threads executing the code in <code class="language-java">doSomething</code> of the <code class="language-java">instance-1</code> at the same time. Try running it many times.</p>
+<h5 id="synchronized-blocks-statements">Synchronized blocks (statements)</h5>
+<p>Sometimes you need to synchronize only a part of a method. This is possible by using synchronized blocks (statements). They must specify an object for locking threads.</p>
+<p>Here is a class with a static and an instance method. Both methods are unsynchronized but have synchronized parts inside.</p>
+<pre><code class="language-java">class SomeClass {
+    public static void staticMethod() {
+        // unsynchronized code
+        ...
+        synchronized (SomeClass.class) { // synchronization on object of SomeClass class
+            // synchronized code
+            ...
+        }
+    }
+
+    public void instanceMethod() {
+        // unsynchronized code
+        ...
+        synchronized (this) { // synchronization on this instance
+            // synchronized code
+            ...
+        }
+    }
+}</code></pre>
+<p>The block inside <code class="language-java">staticMethod</code> is synchronized on the <code class="language-java">SomeClass.class</code> object, which means only one thread can execute code in this block.</p>
+<p>The block inside <code class="language-java">instanceMethod</code> is synchronized on <code class="language-java">this</code> instance, which means only one thread can execute the block of the instance. But some other thread is able to execute the block of different instances at the same time.</p>
+<p>Synchronized blocks may resemble synchronized methods, but they allow programmers to synchronize only necessary parts of methods.</p>
+<h5 id="conclusion">Conclusion</h5>
+<p>We have covered <strong>synchronized</strong> keyword - basic thread synchronization mechanism. Using it you can control access to critical sections and be sure that only one thead processes a protected piece of code. The keyword can be applied to both static and instance methods as well as <a class="theory-lookup not-relevant" href="/learn/step/3557" rel="noopener noreferrer nofollow" target="_blank" title="In Java, a code block is a group of statements that should be executed together. | Code blocks can be used to define methods, constructors, initializer blocks, and control structures such as loops and if-else statements. The statements within a block are executed sequentially, and any variable declared within the block is only accessible within that block. Code blocks are useful for organizing and controlling the flow of code in a Java program. They are also used to define the scope of variables and methods. In Java 15, text blocks were introduced as a new feature for handling long, multi-line strings in a more readable and visually appealing way.">code blocks</a>. The main difference between static and instance methods is a synchronization monitor. Applying syncronized keyword to a static method uses the class object as a monitor. Instance method synchronization uses the instance itself as a monitor. Applying synchronization to block is the most agile way. It allows configuring bondaries of critical section as well as specifying synchronization monitor.</p>
+</div>

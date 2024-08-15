@@ -1,0 +1,16 @@
+type: choice
+is_multiple_choice: false
+options:
+  - text: Two threads cannot simultaneously enter into two synchronized blocks with
+      the same monitor
+  - text: Static methods are synchronized on an instance of the class
+  - text: Classes can be declared as synchronized
+  - text: Fields can be declared as synchronized
+files:
+  - name: src/Task.java
+    visible: true
+    learner_created: false
+feedback_link: https://hyperskill.org/learn/step/36497#comment
+status: Solved
+record: -1
+local_check: false

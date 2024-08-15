@@ -1,0 +1,29 @@
+type: edu
+files:
+  - name: src/cinema/Main.java
+    visible: true
+    learner_created: false
+  - name: src/resources/application.properties
+    visible: true
+    learner_created: false
+  - name: test/CinemaTests.java
+    visible: false
+    learner_created: false
+  - name: build.gradle
+    visible: true
+    learner_created: false
+  - name: src/cinema/CinemaRoom.java
+    visible: true
+    learner_created: true
+  - name: src/cinema/Controller.java
+    visible: true
+    learner_created: true
+  - name: src/cinema/CinemaController.java
+    visible: true
+    learner_created: true
+feedback_link: https://hyperskill.org/learn/step/13375#comment
+status: Solved
+feedback:
+  message: Congratulations!
+  time: "Wed, 31 Jul 2024 13:42:19 UTC"
+record: 1

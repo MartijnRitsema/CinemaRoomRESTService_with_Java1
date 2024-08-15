@@ -1,0 +1,35 @@
+<div class="step-text">
+<h5 id="threads-in-java">Threads in Java</h5>
+<p>Java was originally designed with built-in multithreading support. Threads are supported at the level of the JVM, at the level of the language by special keywords, and at the level of the <a class="theory-lookup not-relevant" href="/learn/step/4875" rel="noopener noreferrer nofollow" target="_blank" title="In Java, a standard library refers to the pre-written collection of classes, interfaces, and methods that are included in the Java Development Kit (JDK). | These libraries provide reusable code for common programming tasks, such as working with collections. The standard library includes several types of collections, such as lists, sets, and maps, which are represented by different classes from the java.util package. These collections can store reference types, including custom classes, and can be either mutable or immutable. When the standard libraries do not provide sufficient functionality, developers can use external libraries, such as the Guava collection library developed by Google, or create their own collections.">standard library</a>. Every Java program has at least one thread, which is called <strong>main,</strong> created automatically by the JVM process to execute <a class="theory-lookup not-relevant" href="/learn/step/4875" rel="noopener noreferrer nofollow" target="_blank" title="In Java, a statement is a unit of code that performs a specific action. | It can be a standalone instruction or a part of a larger block of code. A statement can take various forms, such as assignment statements, object creation statements, method invocation statements, or control flow statements. Control flow statements, such as if-else statements or switch statements, allow for decision-making and conditional execution of code based on certain conditions. A statement's execution order is determined by the program's control flow, which can be affected by blocks, loops, and other control structures.">statements</a> inside the <code class="language-java">main</code> method. All Java programs have some other default threads as well (for example, a separate thread for the garbage collector).</p>
+<p>Throughout the stages of development of the Java language, the approach to multithreading has changed from the use of low-level threads to the use of some high-level abstractions. However, understanding the fundamental base remains very important for a good developer.</p>
+<h5 id="a-class-for-threads">A class for threads</h5>
+<p>Each thread is represented by an object that is an instance of the <code class="language-java">java.lang.Thread</code> class (or its subclass). This class has a <a class="theory-lookup not-relevant" href="/learn/step/4875" rel="noopener noreferrer nofollow" target="_blank" title="In Java, a static method is a method that is associated with a class rather than an instance of a class. | It can be accessed directly using the class name and does not require the creation of a class instance. A static method can only access static fields and other static methods within the same class, and cannot refer to the `this` keyword because there is no instance context. Static methods are often used as utility methods that provide common functionality for the entire project. They can be called from instance methods, but not the other way around.">static method</a> named <code class="language-java">currentThread</code> to obtain a reference to the currently executing thread object:</p>
+<pre><code class="language-java">Thread thread = Thread.currentThread(); // the current thread</code></pre>
+<p>Any thread has a name, an identifier (<code class="language-java">long</code>), a priority, and some other characteristics that can be obtained through its methods.</p>
+<h5 id="the-information-about-the-main-thread">The information about the main thread</h5>
+<p>The example below demonstrates how to obtain the characteristics of the <strong>main </strong>thread by obtaining a reference to it through an object of the <code class="language-java">Thread</code>class.</p>
+<pre><code class="language-java">public class MainThreadDemo {
+    public static void main(String[] args) {
+        Thread t = Thread.currentThread(); // main thread
+
+        System.out.println("Name: " + t.getName());
+        System.out.println("ID: " + t.getId());
+        System.out.println("Alive: " + t.isAlive());
+        System.out.println("Priority: " + t.getPriority());
+        System.out.println("Daemon: " + t.isDaemon());
+
+        t.setName("my-thread");
+        System.out.println("New name: " + t.getName());
+    }
+}</code></pre>
+<p>All statements in this program are executed by the <strong>main</strong> thread.</p>
+<p><br/>The invocation <code class="language-java">t.isAlive()</code> returns whether the thread has been started and hasn't died yet. Every thread has a <strong>priority</strong>, and the <code class="language-java">getPriority()</code> method returns the priority of a given thread. Threads with a higher priority are executed in preference to threads with lower priorities. The invocation <code class="language-java">t.isDaemon()</code> checks whether the thread is a <strong>daemon</strong>. A daemon thread (which comes from UNIX terminology) is a low-priority thread that runs in the background to perform tasks such as <a class="theory-lookup not-relevant" href="/learn/step/4875" rel="noopener noreferrer nofollow" target="_blank" title="In Java, garbage collection is the process of automatically reclaiming and recycling objects that are no longer in use or referenced by a program. | When an object is created in Java, it resides in the heap memory. Once the object is no longer reachable or referenced, it becomes eligible for garbage collection. The garbage collector, which is a part of the Java Virtual Machine (JVM), frees up the memory by removing these unreferenced objects. This process helps in managing memory allocation and preventing memory leaks. As a result, it enhances the performance and stability of the application.">garbage collection</a> and so on. JVM does not wait for daemon threads before exiting whereas it waits for <a class="theory-lookup not-relevant" href="/learn/step/4875" rel="noopener noreferrer nofollow" target="_blank" title="In Java, a non-daemon thread is a type of thread that has a higher priority than a daemon thread. | When a Java Virtual Machine (JVM) exits, it waits for all non-daemon threads to finish before exiting. This is different from daemon threads, which run in the background to perform tasks such as garbage collection and do not prevent the JVM from exiting. By default, a new thread created in Java is a non-daemon thread.">non-daemon</a> threads.</p>
+<p>The output of the program will look like this:</p>
+<pre><code class="language-java">Name: main
+ID: 1
+Alive: true
+Priority: 5
+Daemon: false
+New name: my-thread</code></pre>
+<p>The same code can be applied to any current thread, not just <strong>main</strong>.</p>
+</div>
